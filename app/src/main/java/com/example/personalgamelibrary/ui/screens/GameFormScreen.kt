@@ -1,8 +1,12 @@
 package com.example.personalgamelibrary.ui.screens
 
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.verticalScroll
+import androidx.compose.foundation.text.KeyboardOptions
+import androidx.compose.material3.DropdownMenu
+import androidx.compose.material3.DropdownMenuItem
+import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.RadioButton
 import androidx.compose.material3.Switch
@@ -13,17 +17,38 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
-import androidx.compose.ui.Modifier
+import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.tooling.preview.Preview
 import com.example.personalgamelibrary.data.GameStatus
+import com.example.personalgamelibrary.data.genreList
+import com.example.personalgamelibrary.data.platformList
 import com.example.personalgamelibrary.ui.theme.PersonalGameLibraryTheme
+import java.util.Calendar
 
 @Composable
-fun GameFormScreen() {
+fun GameFormScreen(
+    platforms: List<String>,
+    genres: List<String>
+) {
     var nameInput by remember { mutableStateOf("") }
+
+    // Platform
+    var expandedPlatform by remember { mutableStateOf(false) }
     var selectedPlatform by remember { mutableStateOf("") }
+
+    // Genre
+    var expandedGenre by remember { mutableStateOf(false) }
     var selectedGenre by remember { mutableStateOf("") }
+
+    // Year
     var releaseYearInput by remember { mutableStateOf("") }
+        // Year validation
+    var currentYear = Calendar.getInstance().get(Calendar.YEAR)
+    var releaseYear = releaseYearInput.toIntOrNull()
+    var isYearError = releaseYearInput.isNotEmpty() &&
+            (releaseYear == null || releaseYear !in 1950..currentYear)
+
+
     var selectedStatus by remember { mutableStateOf(GameStatus.NOT_STARTED) }
     var isFavoriteChecked by remember { mutableStateOf(false) }
 
@@ -35,23 +60,72 @@ fun GameFormScreen() {
             placeholder = { Text("Type the game's name...") }
         )
 
-        OutlinedTextField(
-            value = selectedPlatform,
-            onValueChange = { selectedPlatform = it },
-            label = { Text("Platform") }
-        )
+        Box {
+            OutlinedButton(onClick = { expandedPlatform = true }) {
+                Text(
+                    if (selectedPlatform.isEmpty())
+                        "Choose a platform"
+                    else
+                        selectedPlatform
+                )
+            }
 
-        OutlinedTextField(
-            value = selectedGenre,
-            onValueChange = { selectedGenre = it },
-            label = { Text("Genre") }
-        )
+            DropdownMenu(
+                expanded = expandedPlatform,
+                onDismissRequest = { expandedPlatform = false}
+            ) {
+                platforms.forEach { platform ->
+                    DropdownMenuItem(
+                        text = { Text(platform) },
+                        onClick = {
+                            selectedPlatform = platform
+                            expandedPlatform = false
+                        }
+                    )
+                }
+            }
+        }
+
+        Box {
+            OutlinedButton(onClick = { expandedGenre = true }) {
+                Text(
+                    if (selectedGenre.isEmpty())
+                        "Choose a genre"
+                    else
+                        selectedGenre
+                )
+            }
+
+            DropdownMenu(
+                expanded = expandedGenre,
+                onDismissRequest =  { expandedGenre = false }
+            ) {
+                genres.forEach { genre ->
+                    DropdownMenuItem(
+                        text = { Text(genre) },
+                        onClick = {
+                            selectedGenre = genre
+                            expandedGenre = false
+                        }
+
+                    )
+                }
+            }
+        }
 
         OutlinedTextField(
             value = releaseYearInput,
-            onValueChange = { releaseYearInput = it },
-            label = { Text("Release Year") }
-
+            onValueChange = { newValue ->
+                if (newValue.length <= 4 && newValue.all { it.isDigit() })
+                    releaseYearInput = newValue
+            },
+            label = { Text("Release Year") },
+            keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
+            singleLine = true,
+            isError = isYearError,
+            supportingText = {
+                if (isYearError) Text("Enter a year between 1950 and $currentYear")
+            }
         )
 
         Text("Status")
@@ -85,6 +159,9 @@ fun GameFormScreen() {
 @Composable
 fun ShowGameFormScreen() {
     PersonalGameLibraryTheme {
-        GameFormScreen()
+        GameFormScreen(
+            platforms = platformList,
+            genres = genreList
+        )
     }
 }
