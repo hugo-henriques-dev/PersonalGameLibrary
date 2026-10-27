@@ -1,9 +1,9 @@
 package com.example.personalgamelibrary.data
 
-import androidx.room3.Database
-import androidx.room3.RoomDatabase
+import androidx.room.Database
+import androidx.room.RoomDatabase
 
-@Database(entities = [VideoGame::class], version = 1)
+@Database(entities = [VideoGame::class], version = 1, exportSchema = false)
 abstract class GameLibraryDatabase : RoomDatabase() {
     abstract fun videoGameDao(): VideoGameDao
 }
