@@ -1,3 +1,66 @@
 <resources>
     <string name="app_name">Personal Game Library</string>
+
+    <!-- Ações comuns -->
+    <string name="action_delete">Eliminar</string>
+    <string name="action_cancel">Cancelar</string>
+
+    <!-- Diálogo de eliminar -->
+    <string name="dialog_delete_title">Eliminar Videojogo</string>
+    <string name="dialog_delete_message">Tem a certeza de que deseja eliminar \"%1$s\"?</string>
+
+    <!-- Ecrã da lista -->
+    <string name="list_title">A Minha Coleção</string>
+    <string name="list_stats">Total: %1$d • A jogar: %2$d • Concluídos: %3$d</string>
+    <string name="list_add">Adicionar</string>
+    <string name="list_empty">Nenhum jogo registado.\nClique no botão + para adicionar!</string>
+    <string name="list_no_results">Nenhum jogo corresponde à pesquisa ou ao filtro.</string>
+    <string name="search_label">Pesquisar jogo por nome...</string>
+    <string name="search_icon_description">Pesquisar</string>
+    <string name="search_clear">Limpar pesquisa</string>
+    <string name="filter_favorites">Favoritos</string>
+    <string name="sort_label">Ordenar: %1$s</string>
+
+    <!-- Cartão do jogo -->
+    <string name="game_cover_description">Capa de %1$s</string>
+    <string name="game_edit">Editar</string>
+    <string name="game_year">Ano: %1$d</string>
+    <string name="favorite_add">Adicionar aos favoritos</string>
+    <string name="favorite_remove">Remover dos favoritos</string>
+
+    <!-- Opções de ordenação -->
+    <string name="sort_newest">Mais recentes</string>
+    <string name="sort_name">Nome (A-Z)</string>
+    <string name="sort_year">Ano de lançamento</string>
+
+    <!-- Estados do jogo -->
+    <string name="status_not_started">Por Jogar</string>
+    <string name="status_in_progress">A Jogar</string>
+    <string name="status_completed">Concluído</string>
+
+    <!-- Formulário -->
+    <string name="form_title_add">Adicionar Videojogo</string>
+    <string name="form_title_edit">Editar Videojogo</string>
+    <string name="form_back">Voltar</string>
+    <string name="form_cover_section">Capa do Videojogo</string>
+    <string name="form_cover_preview_description">Pré-visualização da Capa</string>
+    <string name="form_cover_empty">🖼️\nSem Capa</string>
+    <string name="form_cover_url_label">URL da Imagem da Capa</string>
+    <string name="form_name_label">Nome do Jogo *</string>
+    <string name="form_name_placeholder">Ex: The Legend of Zelda</string>
+    <string name="form_platform_label">Plataforma *</string>
+    <string name="form_platform_placeholder">Escolha uma plataforma</string>
+    <string name="form_genre_label">Género *</string>
+    <string name="form_genre_placeholder">Escolha um género</string>
+    <string name="form_year_label">Ano de Lançamento *</string>
+    <string name="form_year_placeholder">Ex: 2023</string>
+    <string name="form_year_error">Insira um ano entre %1$d e %2$d</string>
+    <string name="form_status_label">Estado do Jogo</string>
+    <string name="form_favorite_label">Marcar como Favorito</string>
+    <string name="form_save">Guardar</string>
+    <string name="form_update">Atualizar</string>
+
+    <!-- Tema -->
+    <string name="theme_switch_to_dark">Ativar modo escuro</string>
+    <string name="theme_switch_to_light">Ativar modo claro</string>
 </resources>

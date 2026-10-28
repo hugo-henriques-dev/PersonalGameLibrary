@@ -15,11 +15,14 @@ import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.foundation.verticalScroll
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material3.Button
 import androidx.compose.material3.Card
 import androidx.compose.material3.DropdownMenu
 import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedButton
@@ -38,16 +41,19 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import coil.compose.AsyncImage
+import com.example.personalgamelibrary.R
 import com.example.personalgamelibrary.data.GameStatus
 import com.example.personalgamelibrary.data.VideoGame
 import com.example.personalgamelibrary.data.genreList
 import com.example.personalgamelibrary.data.platformList
+import com.example.personalgamelibrary.ui.components.clearFocusOnTapOrScroll
 import com.example.personalgamelibrary.ui.theme.PersonalGameLibraryTheme
 import java.util.Calendar
 
@@ -100,13 +106,22 @@ fun GameFormScreen(
             TopAppBar(
                 title = {
                     Text(
-                        text = if (gameToEdit == null) "Adicionar Videojogo" else "Editar Videojogo",
+                        text = stringResource(
+                            if (gameToEdit == null) {
+                                R.string.form_title_add
+                            } else {
+                                R.string.form_title_edit
+                            }
+                        ),
                         fontWeight = FontWeight.Bold
                     )
                 },
                 navigationIcon = {
                     IconButton(onClick = onCancel) {
-                        Text("←", style = MaterialTheme.typography.titleLarge)
+                        Icon(
+                            imageVector = Icons.AutoMirrored.Filled.ArrowBack,
+                            contentDescription = stringResource(R.string.form_back)
+                        )
                     }
                 }
             )
@@ -117,13 +132,14 @@ fun GameFormScreen(
             modifier = Modifier
                 .fillMaxSize()
                 .padding(innerPadding)
+                .clearFocusOnTapOrScroll()
                 .padding(16.dp)
                 .verticalScroll(scrollState),
             verticalArrangement = Arrangement.spacedBy(16.dp)
         ) {
             // Imagem e URL da Capa (Com Pré-Visualização Visual em Tempo Real)
             Text(
-                "Capa do Videojogo",
+                stringResource(R.string.form_cover_section),
                 style = MaterialTheme.typography.titleMedium,
                 fontWeight = FontWeight.Bold
             )
@@ -140,7 +156,9 @@ fun GameFormScreen(
                     if (coverImageInput.isNotBlank()) {
                         AsyncImage(
                             model = coverImageInput,
-                            contentDescription = "Pré-visualização da Capa",
+                            contentDescription = stringResource(
+                                R.string.form_cover_preview_description
+                            ),
                             contentScale = ContentScale.Crop,
                             modifier = Modifier.fillMaxSize()
                         )
@@ -152,7 +170,7 @@ fun GameFormScreen(
                             contentAlignment = Alignment.Center
                         ) {
                             Text(
-                                "🖼️\nSem Capa",
+                                stringResource(R.string.form_cover_empty),
                                 textAlign = TextAlign.Center,
                                 style = MaterialTheme.typography.bodySmall,
                                 color = MaterialTheme.colorScheme.onSurfaceVariant
@@ -165,7 +183,7 @@ fun GameFormScreen(
                     OutlinedTextField(
                         value = coverImageInput,
                         onValueChange = { coverImageInput = it },
-                        label = { Text("URL da Imagem da Capa") },
+                        label = { Text(stringResource(R.string.form_cover_url_label)) },
                         placeholder = { Text("https://images.igdb.com/...") },
                         modifier = Modifier.fillMaxWidth(),
                         singleLine = true
@@ -178,15 +196,15 @@ fun GameFormScreen(
             OutlinedTextField(
                 value = nameInput,
                 onValueChange = { nameInput = it },
-                label = { Text("Nome do Jogo *") },
-                placeholder = { Text("Ex: The Legend of Zelda") },
+                label = { Text(stringResource(R.string.form_name_label)) },
+                placeholder = { Text(stringResource(R.string.form_name_placeholder)) },
                 modifier = Modifier.fillMaxWidth(),
                 singleLine = true
             )
 
             DropdownField(
-                label = "Plataforma *",
-                placeholder = "Escolha uma plataforma",
+                label = stringResource(R.string.form_platform_label),
+                placeholder = stringResource(R.string.form_platform_placeholder),
                 options = platforms,
                 selected = selectedPlatform,
                 onSelected = { selectedPlatform = it },
@@ -194,8 +212,8 @@ fun GameFormScreen(
             )
 
             DropdownField(
-                label = "Género *",
-                placeholder = "Escolha um género",
+                label = stringResource(R.string.form_genre_label),
+                placeholder = stringResource(R.string.form_genre_placeholder),
                 options = genres,
                 selected = selectedGenre,
                 onSelected = { selectedGenre = it },
@@ -209,13 +227,19 @@ fun GameFormScreen(
                         releaseYearInput = newValue
                     }
                 },
-                label = { Text("Ano de Lançamento *") },
-                placeholder = { Text("Ex: 2023") },
+                label = { Text(stringResource(R.string.form_year_label)) },
+                placeholder = { Text(stringResource(R.string.form_year_placeholder)) },
                 keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
                 singleLine = true,
                 isError = isYearError,
                 supportingText = {
-                    if (isYearError) Text("Insira um ano entre $MIN_RELEASE_YEAR e $currentYear")
+                    if (isYearError) {
+                        Text(stringResource(
+                            R.string.form_year_error,
+                            MIN_RELEASE_YEAR,
+                            currentYear
+                        ))
+                    }
                 },
                 modifier = Modifier.fillMaxWidth()
             )
@@ -230,7 +254,10 @@ fun GameFormScreen(
                 verticalAlignment = Alignment.CenterVertically,
                 horizontalArrangement = Arrangement.SpaceBetween
             ) {
-                Text("Marcar como Favorito", style = MaterialTheme.typography.bodyLarge)
+                Text(
+                    stringResource(R.string.form_favorite_label),
+                    style = MaterialTheme.typography.bodyLarge
+                )
                 Switch(
                     checked = isFavoriteChecked,
                     onCheckedChange = { isFavoriteChecked = it }
@@ -263,14 +290,22 @@ fun GameFormScreen(
                     enabled = isFormValid,
                     modifier = Modifier.weight(1f)
                 ) {
-                    Text(if (gameToEdit == null) "Guardar" else "Atualizar")
+                    Text(
+                        stringResource(
+                            if (gameToEdit == null) {
+                                R.string.form_save
+                            } else {
+                                R.string.form_update
+                            }
+                        )
+                    )
                 }
 
                 OutlinedButton(
                     onClick = onCancel,
                     modifier = Modifier.weight(1f)
                 ) {
-                    Text("Cancelar")
+                    Text(stringResource(R.string.action_cancel))
                 }
             }
         }
@@ -328,7 +363,10 @@ private fun StatusSelector(
     modifier: Modifier = Modifier
 ) {
     Column(modifier = modifier) {
-        Text("Estado do Jogo", style = MaterialTheme.typography.bodyLarge)
+        Text(
+            stringResource(R.string.form_status_label),
+            style = MaterialTheme.typography.bodyLarge
+        )
         Spacer(modifier = Modifier.height(4.dp))
         GameStatus.entries.forEach { status ->
             Row(
@@ -339,16 +377,10 @@ private fun StatusSelector(
                     selected = status == selected,
                     onClick = { onSelected(status) }
                 )
-                Text(statusLabel(status))
+                Text(stringResource(status.labelRes))
             }
         }
     }
-}
-
-private fun statusLabel(status: GameStatus): String = when (status) {
-    GameStatus.NOT_STARTED -> "Por Jogar"
-    GameStatus.IN_PROGRESS -> "A Jogar"
-    GameStatus.COMPLETED -> "Concluído"
 }
 
 @Preview(showBackground = true)

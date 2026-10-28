@@ -1,5 +1,11 @@
 package com.example.personalgamelibrary
 
+import android.graphics.Color
+import androidx.activity.SystemBarStyle
+import androidx.compose.foundation.isSystemInDarkTheme
+import androidx.compose.runtime.DisposableEffect
+import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
 import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
@@ -23,7 +29,23 @@ class MainActivity : ComponentActivity() {
         )[GameViewModel::class.java]
 
         setContent {
-            PersonalGameLibraryTheme {
+            val darkOverride by gameViewModel.darkTheme.collectAsState()
+            val darkTheme = darkOverride ?: isSystemInDarkTheme()
+
+            // Ajusta a cor dos ícones das barras do sistema ao tema da app
+            DisposableEffect(darkTheme) {
+                enableEdgeToEdge(
+                    statusBarStyle = SystemBarStyle.auto(Color.TRANSPARENT, Color.TRANSPARENT) {
+                        darkTheme
+                    },
+                    navigationBarStyle = SystemBarStyle.auto(Color.TRANSPARENT, Color.TRANSPARENT) {
+                        darkTheme
+                    }
+                )
+                onDispose {}
+            }
+
+            PersonalGameLibraryTheme(darkTheme = darkTheme) {
                 GameLibraryContent(gameViewModel = gameViewModel)
             }
         }
