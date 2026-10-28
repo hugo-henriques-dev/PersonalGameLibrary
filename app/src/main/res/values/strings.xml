@@ -19,7 +19,6 @@
     <string name="search_icon_description">Pesquisar</string>
     <string name="search_clear">Limpar pesquisa</string>
     <string name="filter_favorites">Favoritos</string>
-    <string name="sort_label">Ordenar: %1$s</string>
 
     <!-- Cartão do jogo -->
     <string name="game_cover_description">Capa de %1$s</string>
@@ -29,9 +28,20 @@
     <string name="favorite_remove">Remover dos favoritos</string>
 
     <!-- Opções de ordenação -->
-    <string name="sort_newest">Mais recentes</string>
-    <string name="sort_name">Nome (A-Z)</string>
+    <string name="sort_title">Ordenar</string>
+    <string name="sort_date_added">Data de adição</string>
+    <string name="sort_name">Nome</string>
     <string name="sort_year">Ano de lançamento</string>
+    <string name="sort_ascending">Ordem crescente</string>
+    <string name="sort_descending">Ordem decrescente</string>
+
+    <!-- Filtros -->
+    <string name="filter_title">Filtrar</string>
+    <string name="filter_title_active">Filtrar (%1$d)</string>
+    <string name="filter_clear">Limpar</string>
+    <string name="filter_section_status">Estado</string>
+    <string name="filter_section_platform">Plataforma</string>
+    <string name="filter_section_genre">Género</string>
 
     <!-- Estados do jogo -->
     <string name="status_not_started">Por Jogar</string>
@@ -46,6 +56,7 @@
     <string name="form_cover_preview_description">Pré-visualização da Capa</string>
     <string name="form_cover_empty">🖼️\nSem Capa</string>
     <string name="form_cover_url_label">URL da Imagem da Capa</string>
+    <string name="form_cover_url_placeholder">https://images.igdb.com/...</string>
     <string name="form_name_label">Nome do Jogo *</string>
     <string name="form_name_placeholder">Ex: The Legend of Zelda</string>
     <string name="form_platform_label">Plataforma *</string>

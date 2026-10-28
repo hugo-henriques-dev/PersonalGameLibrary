@@ -19,13 +19,47 @@ import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.flatMapLatest
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.stateIn
+import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 
-/** Critérios de ordenação da lista. */
-enum class SortOption(@StringRes val labelRes: Int) {
-    NEWEST(R.string.sort_newest),
-    NAME(R.string.sort_name),
-    YEAR(R.string.sort_year)
+/**
+ * Critérios de ordenação da lista.
+ *
+ * :param labelRes: recurso de texto mostrado ao utilizador
+ * :param defaultAscending: direção usada quando o critério é selecionado pela primeira vez
+ */
+enum class SortOption(@StringRes val labelRes: Int, val defaultAscending: Boolean) {
+    DATE_ADDED(R.string.sort_date_added, defaultAscending = false), // mais recentes primeiro
+    NAME(R.string.sort_name, defaultAscending = true), // A-Z
+    YEAR(R.string.sort_year, defaultAscending = false) // mais recentes primeiro
+}
+
+/**
+ * Ordenação ativa: critério e direção.
+ *
+ * :param option: critério de ordenação
+ * :param ascending: true para crescente, false para decrescente
+ */
+data class SortOrder(
+    val option: SortOption = SortOption.DATE_ADDED,
+    val ascending: Boolean = option.defaultAscending
+)
+
+/**
+ * Filtros ativos da lista. Um grupo vazio não restringe a lista; dentro de um grupo
+ * basta o jogo corresponder a uma das opções (ou), e tem de cumprir todos os grupos (e).
+ *
+ * :param statuses: estados escolhidos
+ * :param platforms: plataformas escolhidas
+ * :param genres: géneros escolhidos
+ */
+data class GameFilters(
+    val statuses: Set<GameStatus> = emptySet(),
+    val platforms: Set<String> = emptySet(),
+    val genres: Set<String> = emptySet()
+) {
+    /** Número total de opções marcadas nos três grupos. */
+    val activeCount: Int get() = statuses.size + platforms.size + genres.size
 }
 
 /** Contagens da coleção inteira, sem influência da pesquisa nem dos filtros. */
@@ -56,15 +90,20 @@ class GameViewModel(
     /** Texto atual da caixa de pesquisa. */
     val searchQuery: StateFlow<String> = _searchQuery.asStateFlow()
 
-    private val _sortOption = MutableStateFlow(SortOption.NEWEST)
+    private val _sortOrder = MutableStateFlow(SortOrder())
 
-    /** Critério de ordenação selecionado. */
-    val sortOption: StateFlow<SortOption> = _sortOption.asStateFlow()
+    /** Ordenação ativa (critério e direção). */
+    val sortOrder: StateFlow<SortOrder> = _sortOrder.asStateFlow()
 
     private val _onlyFavorites = MutableStateFlow(false)
 
     /** Indica se a lista mostra apenas os jogos favoritos. */
     val onlyFavorites: StateFlow<Boolean> = _onlyFavorites.asStateFlow()
+
+    private val _filters = MutableStateFlow(GameFilters())
+
+    /** Filtros de estado, plataforma e género ativos. */
+    val filters: StateFlow<GameFilters> = _filters.asStateFlow()
 
     private val _darkTheme = MutableStateFlow(themePreferences.load())
 
@@ -83,20 +122,27 @@ class GameViewModel(
 
     /**
      * Lista final mostrada no ecrã: resultado da pesquisa, com o filtro de
-     * favoritos e a ordenação aplicados. Recalcula quando qualquer um dos três muda.
+     * favoritos, os filtros e a ordenação aplicados. Recalcula quando qualquer um dos quatro muda.
      *
      * O `WhileSubscribed(5000)` mantém a query ativa enquanto o ecrã a observa e
      * pára 5 segundos depois de deixar de ser observada. O intervalo evita
      * reiniciar tudo numa rotação do ecrã.
      */
     val games: StateFlow<List<VideoGame>> =
-        combine(searchedGames, _sortOption, _onlyFavorites) { list, sort, favoritesOnly ->
-            val filtered = if (favoritesOnly) list.filter { it.isFavorite } else list
-            when (sort) {
-                SortOption.NEWEST -> filtered // o DAO já ordena por data, do mais recente
-                SortOption.NAME -> filtered.sortedBy { it.name.lowercase() }
-                SortOption.YEAR -> filtered.sortedByDescending { it.releaseYear }
+        combine(searchedGames, _sortOrder, _onlyFavorites, _filters)
+        { list, order, favoritesOnly, filters ->
+            val filtered = list.filter { game ->
+                (!favoritesOnly || game.isFavorite) &&
+                        (filters.statuses.isEmpty() || game.status in filters.statuses) &&
+                        (filters.platforms.isEmpty() || game.platform in filters.platforms) &&
+                        (filters.genres.isEmpty() || game.genre in filters.genres)
             }
+            val comparator: Comparator<VideoGame> = when (order.option) {
+                SortOption.DATE_ADDED -> compareBy { it.dateAdded }
+                SortOption.NAME -> compareBy { it.name.lowercase() }
+                SortOption.YEAR -> compareBy { it.releaseYear }
+            }
+            filtered.sortedWith(if (order.ascending) comparator else comparator.reversed())
         }.stateIn(
             scope = viewModelScope,
             started = SharingStarted.WhileSubscribed(5000),
@@ -125,12 +171,56 @@ class GameViewModel(
         _searchQuery.value = newQuery
     }
 
-    fun onSortOptionChange(option: SortOption) {
-        _sortOption.value = option
+    /**
+     * Trata o toque numa opção de ordenação: se já estava selecionada inverte a direção,
+     * caso contrário seleciona-a com a sua direção por defeito.
+     *
+     * :param option: opção em que o utilizador tocou
+     */
+    fun onSortOptionClick(option: SortOption) {
+        _sortOrder.update { current ->
+            if (current.option == option) {
+                current.copy(ascending = !current.ascending)
+            } else {
+                SortOrder(option)
+            }
+        }
     }
 
     fun onOnlyFavoritesChange(value: Boolean) {
         _onlyFavorites.value = value
+    }
+
+    /**
+     * Marca ou desmarca um estado nos filtros.
+     *
+     * :param status: estado em que o utilizador tocou
+     */
+    fun onStatusFilterToggle(status: GameStatus) {
+        _filters.update { it.copy(statuses = it.statuses.toggled(status)) }
+    }
+
+    /**
+     * Marca ou desmarca uma plataforma nos filtros.
+     *
+     * :param platform: plataforma em que o utilizador tocou
+     */
+    fun onPlatformFilterToggle(platform: String) {
+        _filters.update { it.copy(platforms = it.platforms.toggled(platform)) }
+    }
+
+    /**
+     * Marca ou desmarca um género nos filtros.
+     *
+     * :param genre: género em que o utilizador tocou
+     */
+    fun onGenreFilterToggle(genre: String) {
+        _filters.update { it.copy(genres = it.genres.toggled(genre)) }
+    }
+
+    /** Remove todos os filtros de estado, plataforma e género (não mexe nos favoritos). */
+    fun onClearFilters() {
+        _filters.value = GameFilters()
     }
 
     /**
@@ -180,3 +270,6 @@ class GameViewModel(
         }
     }
 }
+
+/** Devolve um novo conjunto sem o item, se já lá estava, ou com ele, se não estava. */
+private fun <T> Set<T>.toggled(item: T): Set<T> = if (item in this) this - item else this + item

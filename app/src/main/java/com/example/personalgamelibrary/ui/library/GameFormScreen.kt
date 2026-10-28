@@ -19,9 +19,11 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material3.Button
 import androidx.compose.material3.Card
-import androidx.compose.material3.DropdownMenu
 import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.ExposedDropdownMenuAnchorType
+import androidx.compose.material3.ExposedDropdownMenuBox
+import androidx.compose.material3.ExposedDropdownMenuDefaults
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
@@ -41,6 +43,7 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.res.stringArrayResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.KeyboardType
@@ -51,8 +54,6 @@ import coil.compose.AsyncImage
 import com.example.personalgamelibrary.R
 import com.example.personalgamelibrary.data.GameStatus
 import com.example.personalgamelibrary.data.VideoGame
-import com.example.personalgamelibrary.data.genreList
-import com.example.personalgamelibrary.data.platformList
 import com.example.personalgamelibrary.ui.components.clearFocusOnTapOrScroll
 import com.example.personalgamelibrary.ui.theme.PersonalGameLibraryTheme
 import java.util.Calendar
@@ -184,7 +185,7 @@ fun GameFormScreen(
                         value = coverImageInput,
                         onValueChange = { coverImageInput = it },
                         label = { Text(stringResource(R.string.form_cover_url_label)) },
-                        placeholder = { Text("https://images.igdb.com/...") },
+                        placeholder = { Text(stringResource(R.string.form_cover_url_placeholder)) },
                         modifier = Modifier.fillMaxWidth(),
                         singleLine = true
                     )
@@ -315,6 +316,7 @@ fun GameFormScreen(
 /**
  * Menu suspenso personalizado para selecionar opções.
  */
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 private fun DropdownField(
     label: String,
@@ -326,30 +328,36 @@ private fun DropdownField(
 ) {
     var expanded by remember { mutableStateOf(false) }
 
-    Column(modifier = modifier) {
-        Text(text = label, style = MaterialTheme.typography.bodyMedium)
-        Spacer(modifier = Modifier.height(4.dp))
-        Box(modifier = Modifier.fillMaxWidth()) {
-            OutlinedButton(
-                onClick = { expanded = true },
-                modifier = Modifier.fillMaxWidth()
-            ) {
-                Text(selected.ifEmpty { placeholder })
-            }
+    ExposedDropdownMenuBox(
+        expanded = expanded,
+        onExpandedChange = { expanded = it },
+        modifier = modifier
+    ) {
+        OutlinedTextField(
+            value = selected,
+            onValueChange = {},
+            readOnly = true,
+            label = { Text(label) },
+            placeholder = { Text(placeholder) },
+            trailingIcon = { ExposedDropdownMenuDefaults.TrailingIcon(expanded) },
+            modifier = Modifier
+                .menuAnchor(ExposedDropdownMenuAnchorType.PrimaryNotEditable)
+                .fillMaxWidth()
+        )
 
-            DropdownMenu(
-                expanded = expanded,
-                onDismissRequest = { expanded = false }
-            ) {
-                options.forEach { option ->
-                    DropdownMenuItem(
-                        text = { Text(option) },
-                        onClick = {
-                            onSelected(option)
-                            expanded = false
-                        }
-                    )
-                }
+        ExposedDropdownMenu(
+            expanded = expanded,
+            onDismissRequest = { expanded = false }
+        ) {
+            options.forEach { option ->
+                DropdownMenuItem(
+                    text = { Text(option) },
+                    onClick = {
+                        onSelected(option)
+                        expanded = false
+                    },
+                    contentPadding = ExposedDropdownMenuDefaults.ItemContentPadding
+                )
             }
         }
     }
@@ -388,8 +396,8 @@ private fun StatusSelector(
 private fun GameFormScreenPreview() {
     PersonalGameLibraryTheme {
         GameFormScreen(
-            platforms = platformList,
-            genres = genreList,
+            platforms = stringArrayResource(R.array.platform_list).toList(),
+            genres = stringArrayResource(R.array.genre_list).toList(),
             onSave = {},
             onCancel = {}
         )

@@ -1,0 +1,44 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string-array name="platform_list">
+        <item>Android</item>
+        <item>iOS</item>
+        <item>Linux</item>
+        <item>macOS</item>
+        <item>Nintendo 3DS</item>
+        <item>Nintendo DS</item>
+        <item>Nintendo GameCube</item>
+        <item>Nintendo Switch</item>
+        <item>PC (Windows)</item>
+        <item>PlayStation 1</item>
+        <item>PlayStation 2</item>
+        <item>PlayStation 3</item>
+        <item>PlayStation 4</item>
+        <item>PlayStation 5</item>
+        <item>PSP</item>
+        <item>Steam Deck</item>
+        <item>Xbox</item>
+        <item>Xbox 360</item>
+        <item>Xbox One</item>
+        <item>Xbox Series X/S</item>
+        <item>Outra</item>
+    </string-array>
+
+    <string-array name="genre_list">
+        <item>Ação</item>
+        <item>Aventura</item>
+        <item>Corrida</item>
+        <item>Desporto</item>
+        <item>Estratégia</item>
+        <item>Horror</item>
+        <item>Luta</item>
+        <item>Plataforma</item>
+        <item>Puzzle</item>
+        <item>Roguelike</item>
+        <item>RPG</item>
+        <item>Simulação</item>
+        <item>Soulslike</item>
+        <item>Tiro</item>
+        <item>Outro</item>
+    </string-array>
+</resources>

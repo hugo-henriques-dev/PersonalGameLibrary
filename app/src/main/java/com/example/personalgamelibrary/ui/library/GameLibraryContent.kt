@@ -13,6 +13,7 @@ import androidx.compose.runtime.produceState
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.res.stringArrayResource
 import androidx.compose.ui.res.stringResource
 import androidx.navigation.NavType
 import androidx.navigation.compose.NavHost
@@ -21,8 +22,6 @@ import androidx.navigation.compose.rememberNavController
 import androidx.navigation.navArgument
 import com.example.personalgamelibrary.R
 import com.example.personalgamelibrary.data.VideoGame
-import com.example.personalgamelibrary.data.genreList
-import com.example.personalgamelibrary.data.platformList
 import com.example.personalgamelibrary.ui.navigation.Routes
 
 /**
@@ -41,6 +40,8 @@ fun GameLibraryContent(
 ) {
     val navController = rememberNavController()
     var gameToDelete by remember { mutableStateOf<VideoGame?>(null) }
+    val platforms = stringArrayResource(R.array.platform_list).toList()
+    val genres = stringArrayResource(R.array.genre_list).toList()
 
     NavHost(
         navController = navController,
@@ -51,7 +52,8 @@ fun GameLibraryContent(
             val games by gameViewModel.games.collectAsState()
             val searchQuery by gameViewModel.searchQuery.collectAsState()
             val stats by gameViewModel.stats.collectAsState()
-            val sortOption by gameViewModel.sortOption.collectAsState()
+            val sortOrder by gameViewModel.sortOrder.collectAsState()
+            val filters by gameViewModel.filters.collectAsState()
             val onlyFavorites by gameViewModel.onlyFavorites.collectAsState()
             val darkOverride by gameViewModel.darkTheme.collectAsState()
             val isDarkTheme = darkOverride ?: isSystemInDarkTheme()
@@ -60,11 +62,18 @@ fun GameLibraryContent(
                 games = games,
                 stats = stats,
                 searchQuery = searchQuery,
-                sortOption = sortOption,
+                sortOrder = sortOrder,
+                filters = filters,
+                platforms = platforms,
+                genres = genres,
                 onlyFavorites = onlyFavorites,
                 isDarkTheme = isDarkTheme,
                 onSearchQueryChange = { gameViewModel.onSearchQueryChange(it) },
-                onSortOptionChange = { gameViewModel.onSortOptionChange(it) },
+                onSortOptionClick = { gameViewModel.onSortOptionClick(it) },
+                onStatusFilterToggle = { gameViewModel.onStatusFilterToggle(it) },
+                onPlatformFilterToggle = { gameViewModel.onPlatformFilterToggle(it) },
+                onGenreFilterToggle = { gameViewModel.onGenreFilterToggle(it) },
+                onClearFilters = { gameViewModel.onClearFilters() },
                 onOnlyFavoritesChange = { gameViewModel.onOnlyFavoritesChange(it) },
                 onAddClick = { navController.navigate(Routes.form()) },
                 onEditGame = { game -> navController.navigate(Routes.form(game.id)) },
@@ -96,8 +105,8 @@ fun GameLibraryContent(
             // para nunca abrir um formulário vazio em modo "adicionar" por engano
             if (!isEditing || gameToEdit != null) {
                 GameFormScreen(
-                    platforms = platformList,
-                    genres = genreList,
+                    platforms = platforms,
+                    genres = genres,
                     gameToEdit = gameToEdit,
                     onSave = { game ->
                         if (isEditing) {
