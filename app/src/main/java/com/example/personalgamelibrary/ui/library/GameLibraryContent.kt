@@ -31,7 +31,8 @@ import com.example.personalgamelibrary.ui.navigation.Routes
  * O formulário recebe o id do jogo na rota: sem id adiciona, com id edita
  * (o jogo é lido da base de dados).
  *
- * :param gameViewModel: ViewModel que fornece o estado e executa as operações
+ * @param gameViewModel ViewModel que fornece o estado e executa as operações
+ * @param modifier modificador de layout
  */
 @Composable
 fun GameLibraryContent(
@@ -126,7 +127,10 @@ fun GameLibraryContent(
         AlertDialog(
             onDismissRequest = { gameToDelete = null },
             title = { Text(stringResource(R.string.dialog_delete_title)) },
-            text = { Text(stringResource(R.string.dialog_delete_message, game.name)) },
+            text = { Text(
+                stringResource(
+                    R.string.dialog_delete_message, game.name))
+            },
             confirmButton = {
                 TextButton(
                     onClick = {

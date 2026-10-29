@@ -62,7 +62,18 @@ private const val MIN_RELEASE_YEAR = 1950
 private const val RELEASE_YEAR_LENGTH = 4
 
 /**
- * Ecrã 2: Formulário para Adicionar ou Editar um Videojogo.
+ * Formulário para adicionar um novo videojogo ou editar um existente.
+ *
+ * Valida se os campos obrigatórios (nome, plataforma, género e ano de lançamento)
+ * foram preenchidos corretamente antes de permitir guardar. Quando [gameToEdit] é
+ * fornecido, pré-preenche os campos para edição.
+ *
+ * @param platforms lista de plataformas disponíveis para escolha
+ * @param genres lista de géneros disponíveis para escolha
+ * @param onSave callback invocado com o [VideoGame] preenchido para guardar ou atualizar
+ * @param onCancel callback invocado para sair do formulário sem guardar
+ * @param modifier modificador de layout
+ * @param gameToEdit jogo a editar, ou null para adicionar um jogo novo
  */
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -185,7 +196,9 @@ fun GameFormScreen(
                         value = coverImageInput,
                         onValueChange = { coverImageInput = it },
                         label = { Text(stringResource(R.string.form_cover_url_label)) },
-                        placeholder = { Text(stringResource(R.string.form_cover_url_placeholder)) },
+                        placeholder = {
+                            Text(stringResource(R.string.form_cover_url_placeholder))
+                        },
                         modifier = Modifier.fillMaxWidth(),
                         singleLine = true
                     )
@@ -224,7 +237,9 @@ fun GameFormScreen(
             OutlinedTextField(
                 value = releaseYearInput,
                 onValueChange = { newValue ->
-                    if (newValue.length <= RELEASE_YEAR_LENGTH && newValue.all { it.isDigit() }) {
+                    if (newValue.length <= RELEASE_YEAR_LENGTH &&
+                        newValue.all { it.isDigit() }
+                    ) {
                         releaseYearInput = newValue
                     }
                 },
@@ -273,7 +288,8 @@ fun GameFormScreen(
             ) {
                 Button(
                     onClick = {
-                        val validYear = releaseYear ?: Calendar.getInstance().get(Calendar.YEAR)
+                        val validYear = releaseYear
+                            ?: Calendar.getInstance().get(Calendar.YEAR)
                         onSave(
                             VideoGame(
                                 id = gameToEdit?.id ?: 0,
@@ -282,7 +298,8 @@ fun GameFormScreen(
                                 genre = selectedGenre,
                                 releaseYear = validYear,
                                 status = selectedStatus,
-                                dateAdded = gameToEdit?.dateAdded ?: System.currentTimeMillis(),
+                                dateAdded = gameToEdit?.dateAdded
+                                    ?: System.currentTimeMillis(),
                                 isFavorite = isFavoriteChecked,
                                 coverImage = coverImageInput.ifBlank { null }
                             )

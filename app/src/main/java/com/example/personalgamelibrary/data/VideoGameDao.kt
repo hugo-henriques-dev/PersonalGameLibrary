@@ -30,10 +30,14 @@ interface VideoGameDao {
      * Devolve os jogos cujo nome contém o texto indicado (sem distinguir maiúsculas
      * de minúsculas), do mais recente para o mais antigo.
      *
-     * :param query: texto a procurar no nome
-     * :returns: fluxo que emite os resultados sempre que a tabela muda
+     * @param query texto a procurar no nome
+     * @return fluxo que emite os resultados sempre que a tabela muda
      */
-    @Query("SELECT * FROM video_games WHERE name LIKE '%' || :query || '%' ORDER BY dateAdded DESC")
+    @Query(
+        "SELECT * FROM video_games " +
+            "WHERE name LIKE '%' || :query || '%' " +
+            "ORDER BY dateAdded DESC"
+    )
     fun searchByName(query: String): Flow<List<VideoGame>>
 
     @Query("SELECT * FROM video_games WHERE id = :id")

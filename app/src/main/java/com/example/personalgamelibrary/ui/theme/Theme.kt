@@ -51,14 +51,19 @@ private val LightColorScheme = lightColorScheme(
 @Composable
 fun PersonalGameLibraryTheme(
     darkTheme: Boolean = isSystemInDarkTheme(),
-    // Desativado por defeito para garantir que a paleta personalizada prevalece sobre a do sistema
+    // Desativado por defeito para garantir que a paleta personalizada prevalece sobre
+    // a do sistema
     dynamicColor: Boolean = false,
     content: @Composable () -> Unit
 ) {
     val colorScheme = when {
         dynamicColor && Build.VERSION.SDK_INT >= Build.VERSION_CODES.S -> {
             val context = LocalContext.current
-            if (darkTheme) dynamicDarkColorScheme(context) else dynamicLightColorScheme(context)
+            if (darkTheme) {
+                dynamicDarkColorScheme(context)
+            } else {
+                dynamicLightColorScheme(context)
+            }
         }
 
         darkTheme -> DarkColorScheme

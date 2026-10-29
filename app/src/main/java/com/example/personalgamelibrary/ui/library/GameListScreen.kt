@@ -1,16 +1,12 @@
 package com.example.personalgamelibrary.ui.library
 
-import androidx.compose.foundation.horizontalScroll
-import androidx.compose.foundation.layout.ExperimentalLayoutApi
-import androidx.compose.foundation.layout.FlowRow
-import androidx.compose.foundation.rememberScrollState
-import androidx.compose.foundation.verticalScroll
-import androidx.compose.material3.TextButton
-import com.example.personalgamelibrary.data.GameStatus
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.horizontalScroll
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.ExperimentalLayoutApi
+import androidx.compose.foundation.layout.FlowRow
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
@@ -21,6 +17,8 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.ArrowDownward
@@ -43,6 +41,7 @@ import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
 import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.rememberModalBottomSheetState
 import androidx.compose.runtime.Composable
@@ -57,6 +56,7 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import com.example.personalgamelibrary.R
+import com.example.personalgamelibrary.data.GameStatus
 import com.example.personalgamelibrary.data.VideoGame
 import com.example.personalgamelibrary.ui.components.clearFocusOnTapOrScroll
 
@@ -66,8 +66,28 @@ import com.example.personalgamelibrary.ui.components.clearFocusOnTapOrScroll
  * Não guarda estado próprio: recebe-o por parâmetro e comunica as ações do utilizador
  * através de callbacks, ficando o estado no [GameViewModel].
  *
- * :param games: jogos a mostrar, já pesquisados, filtrados e ordenados
- * :param stats: totais da coleção inteira, sem influência da pesquisa nem dos filtros
+ * @param games jogos a mostrar, já pesquisados, filtrados e ordenados
+ * @param stats totais da coleção inteira, sem influência da pesquisa nem dos filtros
+ * @param searchQuery texto de pesquisa atual
+ * @param sortOrder ordenação ativa (critério e direção)
+ * @param filters filtros ativos por estado, plataforma e género
+ * @param platforms lista de plataformas disponíveis para escolha
+ * @param genres lista de géneros disponíveis para escolha
+ * @param onlyFavorites indica se apenas jogos favoritos estão visíveis
+ * @param isDarkTheme indica se o tema escuro está ativo
+ * @param onSearchQueryChange callback invocado quando a pesquisa é alterada
+ * @param onSortOptionClick callback invocado ao selecionar uma opção de ordenação
+ * @param onStatusFilterToggle callback invocado ao alternar um filtro de estado
+ * @param onPlatformFilterToggle callback invocado ao alternar um filtro de plataforma
+ * @param onGenreFilterToggle callback invocado ao alternar um filtro de género
+ * @param onClearFilters callback invocado para limpar os filtros de categoria
+ * @param onOnlyFavoritesChange callback invocado para alternar o filtro de favoritos
+ * @param onAddClick callback ao clicar no botão de adicionar jogo
+ * @param onEditGame callback ao selecionar um jogo para edição
+ * @param onDeleteGame callback ao selecionar um jogo para eliminação
+ * @param onToggleFavorite callback ao alternar o estado de favorito de um jogo
+ * @param onToggleTheme callback ao alternar entre tema claro e escuro
+ * @param modifier modificador de layout
  */
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -206,7 +226,9 @@ fun GameListScreen(
                     Text(
                         text = stringResource(
                             if (searchQuery.isBlank() &&
-                                !onlyFavorites && filters.activeCount == 0) {
+                                !onlyFavorites &&
+                                filters.activeCount == 0
+                            ) {
                                 R.string.list_empty
                             } else {
                                 R.string.list_no_results
@@ -242,8 +264,9 @@ fun GameListScreen(
  * direção por defeito. O painel fica aberto para se ver o resultado e fecha ao arrastar
  * para baixo, ao tocar fora ou com o botão voltar.
  *
- * :param order: ordenação ativa
- * :param onOptionClick: chamado quando o utilizador toca numa opção do painel
+ * @param order ordenação ativa
+ * @param onOptionClick chamado quando o utilizador toca numa opção do painel
+ * @param modifier modificador de layout
  */
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -310,9 +333,14 @@ private fun SortDirectionIcon(ascending: Boolean, modifier: Modifier = Modifier)
  * Dentro de cada grupo basta corresponder a uma das opções marcadas; entre grupos tem de
  * cumprir todos. O botão mostra quantas opções estão marcadas.
  *
- * :param filters: filtros ativos
- * :param platforms: plataformas disponíveis para escolher
- * :param genres: géneros disponíveis para escolher
+ * @param filters filtros ativos
+ * @param platforms plataformas disponíveis para escolher
+ * @param genres géneros disponíveis para escolher
+ * @param onStatusToggle callback ao alternar um estado nos filtros
+ * @param onPlatformToggle callback ao alternar uma plataforma nos filtros
+ * @param onGenreToggle callback ao alternar um género nos filtros
+ * @param onClear callback para limpar todos os filtros ativos
+ * @param modifier modificador de layout
  */
 @OptIn(ExperimentalMaterial3Api::class, ExperimentalLayoutApi::class)
 @Composable
@@ -399,7 +427,10 @@ private fun FilterSelector(
     }
 }
 
-/** Grupo de chips de um filtro, com título; os chips passam para a linha seguinte se não couberem. */
+/**
+ * Grupo de chips de um filtro, com título; os chips passam para a linha
+ * seguinte se não couberem.
+ */
 @OptIn(ExperimentalLayoutApi::class)
 @Composable
 private fun FilterSection(title: String, content: @Composable () -> Unit) {

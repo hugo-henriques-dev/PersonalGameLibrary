@@ -11,7 +11,7 @@ import com.example.personalgamelibrary.R
  * O Room guarda o enum pelo nome da constante (por exemplo `IN_PROGRESS`), por isso
  * renomear uma constante deixa de reconhecer os dados já guardados.
  *
- * :param labelRes: recurso de texto mostrado ao utilizador
+ * @param labelRes recurso de texto mostrado ao utilizador
  */
 enum class GameStatus(@StringRes val labelRes: Int) {
     NOT_STARTED(R.string.status_not_started),
@@ -22,15 +22,16 @@ enum class GameStatus(@StringRes val labelRes: Int) {
 /**
  * Videojogo da coleção. Cada instância corresponde a uma linha da tabela `video_games`.
  *
- * :param id: identificador único, gerado pela base de dados (0 = ainda não inserido)
- * :param name: nome do jogo
- * :param platform: plataforma em que se joga
- * :param genre: género do jogo
- * :param releaseYear: ano de lançamento
- * :param status: estado do jogo na coleção
- * :param dateAdded: momento em que foi adicionado, em milissegundos desde 1970 (usado na ordenação)
- * :param isFavorite: true se estiver marcado como favorito
- * :param coverImage: URL da imagem de capa, ou null se não tiver
+ * @param id identificador único, gerado pela base de dados (0 = ainda não inserido)
+ * @param name nome do jogo
+ * @param platform plataforma em que se joga
+ * @param genre género do jogo
+ * @param releaseYear ano de lançamento
+ * @param status estado do jogo na coleção
+ * @param dateAdded momento em que foi adicionado, em milissegundos desde 1970
+ *   (usado na ordenação)
+ * @param isFavorite true se estiver marcado como favorito
+ * @param coverImage URL da imagem de capa, ou null se não tiver
  */
 @Entity(tableName = "video_games")
 data class VideoGame(

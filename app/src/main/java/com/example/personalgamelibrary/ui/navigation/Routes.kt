@@ -18,8 +18,8 @@ object Routes {
     /**
      * Constrói a rota concreta do formulário.
      *
-     * :param gameId: id do jogo a editar, ou null para adicionar um jogo novo
-     * :returns: a rota pronta a passar a `navController.navigate`
+     * @param gameId id do jogo a editar, ou null para adicionar um jogo novo
+     * @return a rota pronta a passar a `navController.navigate`
      */
     fun form(gameId: Int? = null): String =
         if (gameId == null) "form" else "form?$GAME_ID_ARG=$gameId"

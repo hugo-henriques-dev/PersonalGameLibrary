@@ -25,8 +25,8 @@ import kotlinx.coroutines.launch
 /**
  * Critérios de ordenação da lista.
  *
- * :param labelRes: recurso de texto mostrado ao utilizador
- * :param defaultAscending: direção usada quando o critério é selecionado pela primeira vez
+ * @param labelRes recurso de texto mostrado ao utilizador
+ * @param defaultAscending direção usada quando o critério é selecionado pela primeira vez
  */
 enum class SortOption(@StringRes val labelRes: Int, val defaultAscending: Boolean) {
     DATE_ADDED(R.string.sort_date_added, defaultAscending = false), // mais recentes primeiro
@@ -37,8 +37,8 @@ enum class SortOption(@StringRes val labelRes: Int, val defaultAscending: Boolea
 /**
  * Ordenação ativa: critério e direção.
  *
- * :param option: critério de ordenação
- * :param ascending: true para crescente, false para decrescente
+ * @param option critério de ordenação
+ * @param ascending true para crescente, false para decrescente
  */
 data class SortOrder(
     val option: SortOption = SortOption.DATE_ADDED,
@@ -49,9 +49,9 @@ data class SortOrder(
  * Filtros ativos da lista. Um grupo vazio não restringe a lista; dentro de um grupo
  * basta o jogo corresponder a uma das opções (ou), e tem de cumprir todos os grupos (e).
  *
- * :param statuses: estados escolhidos
- * :param platforms: plataformas escolhidas
- * :param genres: géneros escolhidos
+ * @param statuses estados escolhidos
+ * @param platforms plataformas escolhidas
+ * @param genres géneros escolhidos
  */
 data class GameFilters(
     val statuses: Set<GameStatus> = emptySet(),
@@ -76,8 +76,8 @@ data class CollectionStats(
  * pesquisa, ordenação e filtro de favoritos) e encapsula as operações de escrita
  * na base de dados, que correm em corrotinas do `viewModelScope`.
  *
- * :param videoGameDao: acesso à tabela de videojogos
- * :param themePreferences: armazenamento da escolha de tema
+ * @param videoGameDao acesso à tabela de videojogos
+ * @param themePreferences armazenamento da escolha de tema
  */
 @OptIn(ExperimentalCoroutinesApi::class)
 class GameViewModel(
@@ -117,20 +117,29 @@ class GameViewModel(
      * cancela a anterior, evitando resultados antigos a chegar depois dos novos.
      */
     private val searchedGames = _searchQuery.flatMapLatest { query ->
-        if (query.isBlank()) videoGameDao.getAll() else videoGameDao.searchByName(query.trim())
+        if (query.isBlank()) {
+            videoGameDao.getAll()
+        } else {
+            videoGameDao.searchByName(query.trim())
+        }
     }
 
     /**
      * Lista final mostrada no ecrã: resultado da pesquisa, com o filtro de
-     * favoritos, os filtros e a ordenação aplicados. Recalcula quando qualquer um dos quatro muda.
+     * favoritos, os filtros e a ordenação aplicados. Recalcula quando qualquer
+     * um dos quatro muda.
      *
      * O `WhileSubscribed(5000)` mantém a query ativa enquanto o ecrã a observa e
      * pára 5 segundos depois de deixar de ser observada. O intervalo evita
      * reiniciar tudo numa rotação do ecrã.
      */
     val games: StateFlow<List<VideoGame>> =
-        combine(searchedGames, _sortOrder, _onlyFavorites, _filters)
-        { list, order, favoritesOnly, filters ->
+        combine(
+            searchedGames,
+            _sortOrder,
+            _onlyFavorites,
+            _filters
+        ) { list, order, favoritesOnly, filters ->
             val filtered = list.filter { game ->
                 (!favoritesOnly || game.isFavorite) &&
                         (filters.statuses.isEmpty() || game.status in filters.statuses) &&
@@ -175,7 +184,7 @@ class GameViewModel(
      * Trata o toque numa opção de ordenação: se já estava selecionada inverte a direção,
      * caso contrário seleciona-a com a sua direção por defeito.
      *
-     * :param option: opção em que o utilizador tocou
+     * @param option opção em que o utilizador tocou
      */
     fun onSortOptionClick(option: SortOption) {
         _sortOrder.update { current ->
@@ -187,6 +196,7 @@ class GameViewModel(
         }
     }
 
+    /** Atualiza o filtro de mostrar apenas jogos favoritos. */
     fun onOnlyFavoritesChange(value: Boolean) {
         _onlyFavorites.value = value
     }
@@ -194,7 +204,7 @@ class GameViewModel(
     /**
      * Marca ou desmarca um estado nos filtros.
      *
-     * :param status: estado em que o utilizador tocou
+     * @param status estado em que o utilizador tocou
      */
     fun onStatusFilterToggle(status: GameStatus) {
         _filters.update { it.copy(statuses = it.statuses.toggled(status)) }
@@ -203,7 +213,7 @@ class GameViewModel(
     /**
      * Marca ou desmarca uma plataforma nos filtros.
      *
-     * :param platform: plataforma em que o utilizador tocou
+     * @param platform plataforma em que o utilizador tocou
      */
     fun onPlatformFilterToggle(platform: String) {
         _filters.update { it.copy(platforms = it.platforms.toggled(platform)) }
@@ -212,7 +222,7 @@ class GameViewModel(
     /**
      * Marca ou desmarca um género nos filtros.
      *
-     * :param genre: género em que o utilizador tocou
+     * @param genre género em que o utilizador tocou
      */
     fun onGenreFilterToggle(genre: String) {
         _filters.update { it.copy(genres = it.genres.toggled(genre)) }
@@ -226,36 +236,47 @@ class GameViewModel(
     /**
      * Define e guarda o tema escolhido pelo utilizador.
      *
-     * :param enabled: true para o modo escuro, false para o claro
+     * @param enabled true para o modo escuro, false para o claro
      */
     fun setDarkTheme(enabled: Boolean) {
         _darkTheme.value = enabled
         themePreferences.save(enabled)
     }
 
+    /** Insere um novo jogo na base de dados de forma assíncrona. */
     fun addGame(game: VideoGame) {
         viewModelScope.launch { videoGameDao.insert(game) }
     }
 
+    /** Atualiza um jogo existente na base de dados de forma assíncrona. */
     fun updateGame(game: VideoGame) {
         viewModelScope.launch { videoGameDao.update(game) }
     }
 
+    /** Elimina um jogo da base de dados de forma assíncrona. */
     fun deleteGame(game: VideoGame) {
         viewModelScope.launch { videoGameDao.delete(game) }
     }
 
+    /** Alterna o estado de favorito de um jogo e atualiza na base de dados. */
     fun toggleFavorite(game: VideoGame) {
-        viewModelScope.launch { videoGameDao.update(game.copy(isFavorite = !game.isFavorite)) }
+        viewModelScope.launch {
+            videoGameDao.update(game.copy(isFavorite = !game.isFavorite))
+        }
     }
 
+    /**
+     * Procura um jogo pelo seu identificador [id].
+     *
+     * @param id identificador do jogo
+     * @return o [VideoGame] encontrado ou null se não existir
+     */
     suspend fun getGameById(id: Int): VideoGame? = videoGameDao.getById(id)
 
     /**
-     * Cria o [GameViewModel] com a dependência (o DAO) vinda da [GameLibraryApplication],
-     * já que o construtor tem parâmetros e o sistema não o sabe instanciar sozinho.
+     * Cria o [GameViewModel] com as suas dependências vinda da [GameLibraryApplication].
      *
-     * :param application: aplicação que guarda a instância única da base de dados
+     * @param application aplicação com a instância única da base de dados
      */
     class Factory(private val application: GameLibraryApplication) : ViewModelProvider.Factory {
         @Suppress("UNCHECKED_CAST")
